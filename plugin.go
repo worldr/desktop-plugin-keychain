@@ -55,7 +55,7 @@ func getKeyValue(arguments interface{}, requireValue bool) (*string, *string, er
 	if k, exists = args[PARAM_KEY]; !exists {
 		return nil, nil, errors.New("key parameter is required")
 	}
-	if v, exists = args[PARAM_KEY]; requireValue && !exists {
+	if v, exists = args[PARAM_VALUE]; requireValue && !exists {
 		return nil, nil, errors.New("value parameter is required")
 	}
 	var ok bool
@@ -76,7 +76,7 @@ func (p *KeychainPlugin) handleDelete(arguments interface{}) (reply interface{},
 	if err != nil {
 		return nil, newError(err.Error())
 	}
-	return nil, keyring.Delete(p.ServiceName, *k)
+	return nil, keyring.Delete(p.keyLabel(k), *k)
 }
 
 func (p *KeychainPlugin) handleRead(arguments interface{}) (reply interface{}, err error) {
@@ -84,7 +84,7 @@ func (p *KeychainPlugin) handleRead(arguments interface{}) (reply interface{}, e
 	if err != nil {
 		return nil, newError(err.Error())
 	}
-	v, err := keyring.Get(p.ServiceName, *k)
+	v, err := keyring.Get(p.keyLabel(k), *k)
 	if err != nil {
 		if strings.Index(err.Error(), "not found") >= 0 {
 			// not found is fine
@@ -103,7 +103,11 @@ func (p *KeychainPlugin) handleWrite(arguments interface{}) (reply interface{}, 
 	if err != nil {
 		return nil, newError(err.Error())
 	}
-	return nil, keyring.Set(p.ServiceName, *k, *v)
+	return nil, keyring.Set(p.keyLabel(k), *k, *v)
+}
+
+func (p *KeychainPlugin) keyLabel(key *string) string {
+	return p.ServiceName + "." + *key
 }
 
 func newError(message string) error {
