@@ -9,7 +9,7 @@ import (
 	"github.com/zalando/go-keyring"
 )
 
-const channelName = "com.worldr.keychain"
+const channelName = "com.worldr.desktop/keychain"
 
 const (
 	METHOD_DELETE = "deleteKey"
