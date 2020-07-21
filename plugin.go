@@ -2,6 +2,7 @@ package keychain
 
 import (
 	"log"
+	"strings"
 
 	"github.com/go-flutter-desktop/go-flutter"
 	"github.com/go-flutter-desktop/go-flutter/plugin"
@@ -83,7 +84,18 @@ func (p *KeychainPlugin) handleRead(arguments interface{}) (reply interface{}, e
 	if err != nil {
 		return nil, newError(err.Error())
 	}
-	return keyring.Get(p.ServiceName, *k)
+	v, err := keyring.Get(p.ServiceName, *k)
+	if err != nil {
+		if strings.Index(err.Error(), "not found") >= 0 {
+			// not found is fine
+			return nil, nil
+		} else {
+			// other errors must be reported
+			return nil, err
+		}
+	} else {
+		return v, nil
+	}
 }
 
 func (p *KeychainPlugin) handleWrite(arguments interface{}) (reply interface{}, err error) {
